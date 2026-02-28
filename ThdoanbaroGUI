@@ -1,0 +1,91 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService") -- Cần dùng để tạo hiệu ứng mượt mà
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- 1. Tạo ScreenGui chính
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "HeThongThongBao_RGB"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+-- 2. Tạo dòng chữ Thông báo (Sẽ có hiệu ứng)
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(0, 400, 0, 80)
+textLabel.Position = UDim2.new(0.5, -200, 0.4, -40)
+textLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+textLabel.BackgroundTransparency = 0.5
+textLabel.Text = "THÀNH ĐOÀN ĐẸP TRAI"
+textLabel.TextScaled = true
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.Visible = true -- Bắt đầu bằng trạng thái hiện
+textLabel.Parent = screenGui
+
+-- Thêm UICorner cho TextLabel cho đẹp
+local cornerLabel = Instance.new("UICorner")
+cornerLabel.CornerRadius = UDim.new(0, 10)
+cornerLabel.Parent = textLabel
+
+-- 3. Tạo nút Bật/Tắt (Toggle Button)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 120, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0.5, -20) -- Nằm ở cạnh trái
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0) -- Màu xanh khi đang hiện
+toggleButton.Text = "HIỆN/ẨN"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 20
+toggleButton.Parent = screenGui
+
+local cornerButton = Instance.new("UICorner")
+cornerButton.CornerRadius = UDim.new(0, 8)
+cornerButton.Parent = toggleButton
+
+---------------------------------------------------------
+-- 4. PHẦN HIỆU ỨNG (CẦU VỒNG VÀ NHẤP NHÁY)
+---------------------------------------------------------
+
+-- Biến để tính toán thời gian cho hiệu ứng
+local tick = 0 
+-- Tốc độ đổi màu (càng lớn càng nhanh)
+local rainbowSpeed = 0.5 
+-- Tốc độ nhấp nháy (càng lớn càng nhanh)
+local blinkSpeed = 1.5 
+-- Độ mờ tối đa khi nhấp nháy (0 là hiện rõ, 1 là ẩn hoàn toàn)
+local maxTransparency = 0.7 
+
+-- Sử dụng RenderStepped để chạy mỗi khung hình
+RunService.RenderStepped:Connect(function(deltaTime)
+	-- Nếu Label đang ẩn thì không chạy hiệu ứng để tiết kiệm hiệu năng
+	if not textLabel.Visible then return end
+	
+	tick += deltaTime -- Tăng biến thời gian dựa trên thời gian thực giữa các khung hình
+	
+	-- A. Hiệu ứng Cầu Vồng (RGB) cho Text
+	-- Sử dụng hàm math.sin và tick để tạo ra chu kỳ đổi màu mượt mà
+	-- Kết quả của color1, color2, color3 sẽ nằm trong khoảng 0 - 255
+	local color1 = math.sin(tick * rainbowSpeed) * 127.5 + 127.5
+	local color2 = math.sin(tick * rainbowSpeed + 2) * 127.5 + 127.5
+	local color3 = math.sin(tick * rainbowSpeed + 4) * 127.5 + 127.5
+	
+	-- Cập nhật màu chữ
+	textLabel.TextColor3 = Color3.fromRGB(color1, color2, color3)
+	
+	-- B. Hiệu ứng Nhấp Nháy Nhẹ cho Background hoặc Text (Ở đây mình làm cho Text)
+	-- Sử dụng hàm math.sin để tạo ra chu kỳ mờ dần rồi hiện rõ dần
+	-- Chúng ta sẽ thay đổi TextTransparency thay vì BackgroundTransparency để chữ lấp lánh hơn
+	local transparencyCycle = math.sin(tick * blinkSpeed) -- Kết quả từ -1 đến 1
+	-- Chuyển đổi về khoảng 0 đến maxTransparency
+	local textTransparency = (transparencyCycle * 0.5 + 0.5) * maxTransparency 
+	
+	textLabel.TextTransparency = textTransparency
+end)
+
+---------------------------------------------------------
+-- 5. Xử lý sự kiện khi bấm nút (Cập nhật từ bản cũ)
+---------------------------------------------------------
+toggleButton.MouseButton1Click:Connect(function()
+	textLabel.Visible = not textLabel.Visible -- Đảo ngược trạng thái hiện
+	
+	if textLabel.Visible then
+		toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170,
