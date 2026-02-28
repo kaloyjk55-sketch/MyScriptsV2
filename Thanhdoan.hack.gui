@@ -1,0 +1,79 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- 1. TẠO GUI CHÍNH
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ThanhDoanProGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+-- 2. TẠO DÒNG CHỮ (TEXT LABEL)
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(0, 400, 0, 80)
+textLabel.Position = UDim2.new(0.5, -200, 0.4, -40)
+textLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+textLabel.BackgroundTransparency = 0.3
+textLabel.Text = "THÀNH ĐOÀN ĐẸP TRAI"
+textLabel.TextColor3 = Color3.new(1, 1, 1) -- Mặc định trắng trước khi chạy RGB
+textLabel.TextScaled = true
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.Parent = screenGui
+
+local corner1 = Instance.new("UICorner")
+corner1.CornerRadius = UDim.new(0, 12)
+corner1.Parent = textLabel
+
+-- 3. TẠO NÚT BẬT/TẮT (TOGGLE BUTTON)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 120, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0.5, -20)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+toggleButton.Text = "HIỆN/ẨN"
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 18
+toggleButton.Parent = screenGui
+
+local corner2 = Instance.new("UICorner")
+corner2.CornerRadius = UDim.new(0, 8)
+corner2.Parent = toggleButton -- Đã sửa lỗi thiếu chữ 'Button' ở đây
+
+---------------------------------------------------------
+-- 4. HIỆU ỨNG CẦU VỒNG VÀ NHẤP NHÁY
+---------------------------------------------------------
+local tickCounter = 0
+local rainbowSpeed = 2 -- Tốc độ đổi màu
+local blinkSpeed = 3   -- Tốc độ nhấp nháy
+
+RunService.RenderStepped:Connect(function(dt)
+	if textLabel.Visible then
+		tickCounter = tickCounter + dt
+		
+		-- Hiệu ứng Cầu vồng (RGB)
+		local r = math.sin(tickCounter * rainbowSpeed) * 0.5 + 0.5
+		local g = math.sin(tickCounter * rainbowSpeed + 2) * 0.5 + 0.5
+		local b = math.sin(tickCounter * rainbowSpeed + 4) * 0.5 + 0.5
+		textLabel.TextColor3 = Color3.new(r, g, b)
+		
+		-- Hiệu ứng Nhấp nháy nhẹ (Thay đổi độ mờ của chữ)
+		local transparency = math.sin(tickCounter * blinkSpeed) * 0.2 + 0.2 -- Dao động từ 0 đến 0.4
+		textLabel.TextTransparency = transparency
+	end
+end)
+
+---------------------------------------------------------
+-- 5. LOGIC BẬT / TẮT
+---------------------------------------------------------
+toggleButton.MouseButton1Click:Connect(function()
+	textLabel.Visible = not textLabel.Visible
+	
+	-- Đổi màu nút bấm để nhận diện trạng thái
+	if textLabel.Visible then
+		toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0) -- Xanh lá khi bật
+	else
+		toggleButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0) -- Đỏ khi tắt
+	end
+end)
